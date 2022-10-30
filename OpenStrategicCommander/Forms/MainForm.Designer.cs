@@ -31,15 +31,25 @@
             this.trkSwitch = new System.Windows.Forms.TrackBar();
             this.lblSwitchState = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.btnPanel = new System.Windows.Forms.Panel();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnPanel = new System.Windows.Forms.Panel();
             this.dlgLayoutSave = new System.Windows.Forms.SaveFileDialog();
             this.dlgLayoutLoad = new System.Windows.Forms.OpenFileDialog();
             this.radMod1 = new System.Windows.Forms.RadioButton();
             this.radMod2 = new System.Windows.Forms.RadioButton();
             this.radMod3 = new System.Windows.Forms.RadioButton();
+            this.bt_TestForm = new System.Windows.Forms.Button();
+            this.axesPanel = new System.Windows.Forms.Panel();
+            this.gb_SendOption = new System.Windows.Forms.GroupBox();
+            this.rb_DownUp = new System.Windows.Forms.RadioButton();
+            this.rb_SendKey = new System.Windows.Forms.RadioButton();
+            this.rb_SendInput = new System.Windows.Forms.RadioButton();
+            this.btnForward = new OpenStrategicCommander.Controls.CmdrButton();
+            this.btnLeft = new OpenStrategicCommander.Controls.CmdrButton();
+            this.btnBackward = new OpenStrategicCommander.Controls.CmdrButton();
+            this.btnRight = new OpenStrategicCommander.Controls.CmdrButton();
             this.btn1 = new OpenStrategicCommander.Controls.CmdrButton();
             this.btn4 = new OpenStrategicCommander.Controls.CmdrButton();
             this.btn2 = new OpenStrategicCommander.Controls.CmdrButton();
@@ -48,9 +58,13 @@
             this.btnPlus = new OpenStrategicCommander.Controls.CmdrButton();
             this.btn6 = new OpenStrategicCommander.Controls.CmdrButton();
             this.btnMinus = new OpenStrategicCommander.Controls.CmdrButton();
+            this.btnTurnLeft = new OpenStrategicCommander.Controls.CmdrButton();
+            this.btnTurnRight = new OpenStrategicCommander.Controls.CmdrButton();
             ((System.ComponentModel.ISupportInitialize)(this.trkSwitch)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.btnPanel.SuspendLayout();
+            this.axesPanel.SuspendLayout();
+            this.gb_SendOption.SuspendLayout();
             this.SuspendLayout();
             // 
             // trkSwitch
@@ -79,24 +93,9 @@
             this.fileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(529, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(410, 24);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
-            // 
-            // btnPanel
-            // 
-            this.btnPanel.Controls.Add(this.btn1);
-            this.btnPanel.Controls.Add(this.btn4);
-            this.btnPanel.Controls.Add(this.btn2);
-            this.btnPanel.Controls.Add(this.btn5);
-            this.btnPanel.Controls.Add(this.btn3);
-            this.btnPanel.Controls.Add(this.btnPlus);
-            this.btnPanel.Controls.Add(this.btn6);
-            this.btnPanel.Controls.Add(this.btnMinus);
-            this.btnPanel.Location = new System.Drawing.Point(12, 27);
-            this.btnPanel.Name = "btnPanel";
-            this.btnPanel.Size = new System.Drawing.Size(295, 120);
-            this.btnPanel.TabIndex = 6;
             // 
             // fileToolStripMenuItem
             // 
@@ -112,14 +111,29 @@
             this.saveLayoutToolStripMenuItem.Name = "saveLayoutToolStripMenuItem";
             this.saveLayoutToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.saveLayoutToolStripMenuItem.Text = "Save Layout";
-            this.saveLayoutToolStripMenuItem.Click += new System.EventHandler(this.saveLayoutToolStripMenuItem_Click);
+            this.saveLayoutToolStripMenuItem.Click += new System.EventHandler(this.SaveLayoutToolStripMenuItem_Click);
             // 
             // loadLayoutToolStripMenuItem
             // 
             this.loadLayoutToolStripMenuItem.Name = "loadLayoutToolStripMenuItem";
             this.loadLayoutToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.loadLayoutToolStripMenuItem.Text = "Load Layout";
-            this.loadLayoutToolStripMenuItem.Click += new System.EventHandler(this.loadLayoutToolStripMenuItem_Click);
+            this.loadLayoutToolStripMenuItem.Click += new System.EventHandler(this.LoadLayoutToolStripMenuItem_Click);
+            // 
+            // btnPanel
+            // 
+            this.btnPanel.Controls.Add(this.btn1);
+            this.btnPanel.Controls.Add(this.btn4);
+            this.btnPanel.Controls.Add(this.btn2);
+            this.btnPanel.Controls.Add(this.btn5);
+            this.btnPanel.Controls.Add(this.btn3);
+            this.btnPanel.Controls.Add(this.btnPlus);
+            this.btnPanel.Controls.Add(this.btn6);
+            this.btnPanel.Controls.Add(this.btnMinus);
+            this.btnPanel.Location = new System.Drawing.Point(12, 27);
+            this.btnPanel.Name = "btnPanel";
+            this.btnPanel.Size = new System.Drawing.Size(295, 120);
+            this.btnPanel.TabIndex = 6;
             // 
             // dlgLayoutSave
             // 
@@ -168,6 +182,120 @@
             this.radMod3.TabStop = true;
             this.radMod3.Text = "Modifier 3";
             this.radMod3.UseVisualStyleBackColor = true;
+            // 
+            // bt_TestForm
+            // 
+            this.bt_TestForm.Location = new System.Drawing.Point(312, 250);
+            this.bt_TestForm.Name = "bt_TestForm";
+            this.bt_TestForm.Size = new System.Drawing.Size(75, 23);
+            this.bt_TestForm.TabIndex = 8;
+            this.bt_TestForm.Text = "Test Form";
+            this.bt_TestForm.UseVisualStyleBackColor = true;
+            this.bt_TestForm.Click += new System.EventHandler(this.Bt_TestForm_Click);
+            // 
+            // axesPanel
+            // 
+            this.axesPanel.Controls.Add(this.btnForward);
+            this.axesPanel.Controls.Add(this.btnTurnRight);
+            this.axesPanel.Controls.Add(this.btnTurnLeft);
+            this.axesPanel.Controls.Add(this.btnLeft);
+            this.axesPanel.Controls.Add(this.btnBackward);
+            this.axesPanel.Controls.Add(this.btnRight);
+            this.axesPanel.Location = new System.Drawing.Point(12, 153);
+            this.axesPanel.Name = "axesPanel";
+            this.axesPanel.Size = new System.Drawing.Size(295, 120);
+            this.axesPanel.TabIndex = 6;
+            // 
+            // gb_SendOption
+            // 
+            this.gb_SendOption.Controls.Add(this.rb_SendInput);
+            this.gb_SendOption.Controls.Add(this.rb_SendKey);
+            this.gb_SendOption.Controls.Add(this.rb_DownUp);
+            this.gb_SendOption.Location = new System.Drawing.Point(316, 153);
+            this.gb_SendOption.Name = "gb_SendOption";
+            this.gb_SendOption.Size = new System.Drawing.Size(87, 91);
+            this.gb_SendOption.TabIndex = 9;
+            this.gb_SendOption.TabStop = false;
+            this.gb_SendOption.Text = "Key Send";
+            // 
+            // rb_DownUp
+            // 
+            this.rb_DownUp.AutoSize = true;
+            this.rb_DownUp.Location = new System.Drawing.Point(6, 19);
+            this.rb_DownUp.Name = "rb_DownUp";
+            this.rb_DownUp.Size = new System.Drawing.Size(70, 17);
+            this.rb_DownUp.TabIndex = 10;
+            this.rb_DownUp.TabStop = true;
+            this.rb_DownUp.Text = "Down-Up";
+            this.rb_DownUp.UseVisualStyleBackColor = true;
+            this.rb_DownUp.CheckedChanged += new System.EventHandler(this.KeySend_CheckedChanged);
+            // 
+            // rb_SendKey
+            // 
+            this.rb_SendKey.AutoSize = true;
+            this.rb_SendKey.Location = new System.Drawing.Point(6, 42);
+            this.rb_SendKey.Name = "rb_SendKey";
+            this.rb_SendKey.Size = new System.Drawing.Size(68, 17);
+            this.rb_SendKey.TabIndex = 10;
+            this.rb_SendKey.TabStop = true;
+            this.rb_SendKey.Text = "SendKey";
+            this.rb_SendKey.UseVisualStyleBackColor = true;
+            this.rb_SendKey.CheckedChanged += new System.EventHandler(this.KeySend_CheckedChanged);
+            // 
+            // rb_SendInput
+            // 
+            this.rb_SendInput.AutoSize = true;
+            this.rb_SendInput.Location = new System.Drawing.Point(6, 65);
+            this.rb_SendInput.Name = "rb_SendInput";
+            this.rb_SendInput.Size = new System.Drawing.Size(74, 17);
+            this.rb_SendInput.TabIndex = 10;
+            this.rb_SendInput.TabStop = true;
+            this.rb_SendInput.Text = "SendInput";
+            this.rb_SendInput.UseVisualStyleBackColor = true;
+            this.rb_SendInput.CheckedChanged += new System.EventHandler(this.KeySend_CheckedChanged);
+            // 
+            // btnForward
+            // 
+            this.btnForward.Location = new System.Drawing.Point(75, 3);
+            this.btnForward.Name = "btnForward";
+            this.btnForward.Size = new System.Drawing.Size(69, 56);
+            this.btnForward.TabIndex = 5;
+            this.btnForward.Text = "/\\ ()";
+            this.btnForward.UseVisualStyleBackColor = true;
+            this.btnForward.Click += new System.EventHandler(this.AxesBtn_Click);
+            // 
+            // btnLeft
+            // 
+            this.btnLeft.Location = new System.Drawing.Point(3, 28);
+            this.btnLeft.Name = "btnLeft";
+            this.btnLeft.Size = new System.Drawing.Size(69, 56);
+            this.btnLeft.TabIndex = 0;
+            this.btnLeft.Tag = "4 (#)";
+            this.btnLeft.Text = "< ()";
+            this.btnLeft.UseVisualStyleBackColor = true;
+            this.btnLeft.Click += new System.EventHandler(this.AxesBtn_Click);
+            // 
+            // btnBackward
+            // 
+            this.btnBackward.Location = new System.Drawing.Point(75, 61);
+            this.btnBackward.Name = "btnBackward";
+            this.btnBackward.Size = new System.Drawing.Size(69, 56);
+            this.btnBackward.TabIndex = 0;
+            this.btnBackward.Tag = "";
+            this.btnBackward.Text = "\\/ ()";
+            this.btnBackward.UseVisualStyleBackColor = true;
+            this.btnBackward.Click += new System.EventHandler(this.AxesBtn_Click);
+            // 
+            // btnRight
+            // 
+            this.btnRight.Location = new System.Drawing.Point(150, 28);
+            this.btnRight.Name = "btnRight";
+            this.btnRight.Size = new System.Drawing.Size(69, 56);
+            this.btnRight.TabIndex = 0;
+            this.btnRight.Tag = "6 (#)";
+            this.btnRight.Text = "> ()";
+            this.btnRight.UseVisualStyleBackColor = true;
+            this.btnRight.Click += new System.EventHandler(this.AxesBtn_Click);
             // 
             // btn1
             // 
@@ -256,14 +384,39 @@
             this.btnMinus.UseVisualStyleBackColor = true;
             this.btnMinus.Click += new System.EventHandler(this.CmdrBtn_Click);
             // 
+            // btnTurnLeft
+            // 
+            this.btnTurnLeft.Location = new System.Drawing.Point(225, 3);
+            this.btnTurnLeft.Name = "btnTurnLeft";
+            this.btnTurnLeft.Size = new System.Drawing.Size(37, 56);
+            this.btnTurnLeft.TabIndex = 0;
+            this.btnTurnLeft.Tag = "4 (#)";
+            this.btnTurnLeft.Text = "< ()";
+            this.btnTurnLeft.UseVisualStyleBackColor = true;
+            this.btnTurnLeft.Click += new System.EventHandler(this.AxesBtn_Click);
+            // 
+            // btnTurnRight
+            // 
+            this.btnTurnRight.Location = new System.Drawing.Point(262, 3);
+            this.btnTurnRight.Name = "btnTurnRight";
+            this.btnTurnRight.Size = new System.Drawing.Size(33, 56);
+            this.btnTurnRight.TabIndex = 0;
+            this.btnTurnRight.Tag = "4 (#)";
+            this.btnTurnRight.Text = "< ()";
+            this.btnTurnRight.UseVisualStyleBackColor = true;
+            this.btnTurnRight.Click += new System.EventHandler(this.AxesBtn_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(529, 153);
+            this.ClientSize = new System.Drawing.Size(410, 278);
+            this.Controls.Add(this.gb_SendOption);
+            this.Controls.Add(this.bt_TestForm);
             this.Controls.Add(this.radMod1);
             this.Controls.Add(this.radMod3);
             this.Controls.Add(this.radMod2);
+            this.Controls.Add(this.axesPanel);
             this.Controls.Add(this.btnPanel);
             this.Controls.Add(this.lblSwitchState);
             this.Controls.Add(this.trkSwitch);
@@ -280,6 +433,9 @@
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.btnPanel.ResumeLayout(false);
+            this.axesPanel.ResumeLayout(false);
+            this.gb_SendOption.ResumeLayout(false);
+            this.gb_SendOption.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -307,5 +463,17 @@
         private System.Windows.Forms.RadioButton radMod1;
         private System.Windows.Forms.RadioButton radMod2;
         private System.Windows.Forms.RadioButton radMod3;
+        private System.Windows.Forms.Button bt_TestForm;
+        private System.Windows.Forms.Panel axesPanel;
+        private Controls.CmdrButton btnForward;
+        private Controls.CmdrButton btnLeft;
+        private Controls.CmdrButton btnBackward;
+        private Controls.CmdrButton btnRight;
+        private System.Windows.Forms.GroupBox gb_SendOption;
+        private System.Windows.Forms.RadioButton rb_SendKey;
+        private System.Windows.Forms.RadioButton rb_DownUp;
+        private System.Windows.Forms.RadioButton rb_SendInput;
+        private Controls.CmdrButton btnTurnRight;
+        private Controls.CmdrButton btnTurnLeft;
     }
 }

@@ -23,6 +23,7 @@ namespace OpenStrategicCommander
         public TestForm()
         {
             InitializeComponent();
+            tb_head.Text = "1\t?\t?\t?\t?\tButton\tModi";
         }
 
         private void Form2Load(object sender, EventArgs e)
@@ -75,7 +76,7 @@ namespace OpenStrategicCommander
                 var isFirst = true;
                 foreach (var b in input)
                 {
-                    result += isFirst ? string.Empty : ",";
+                    result += isFirst ? string.Empty : "\t";
                     result += b.ToString();
                     isFirst = false;
                 }
@@ -88,6 +89,16 @@ namespace OpenStrategicCommander
             AppendText(e.KeyData.ToString());
             e.Handled = true;
             e.SuppressKeyPress = true;
+        }
+
+        private void TestForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Device.Disconnect();
+        }
+
+        private void btn_Clear_Click(object sender, EventArgs e)
+        {
+            ThreadSafe(() => textBox1.Clear());
         }
 
         private void button1_Click(object sender, EventArgs e)

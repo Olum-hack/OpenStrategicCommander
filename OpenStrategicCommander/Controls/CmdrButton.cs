@@ -17,6 +17,7 @@ namespace OpenStrategicCommander.Controls
             InitializeComponent();
         }
         public SC.Buttons WhichButton;
+        public SC.AxesKey WhichAxes;
         public string TextTemplate;
         public SC.Page1Features LightFeature;
         public SC.Page1Features BlinkFeature;

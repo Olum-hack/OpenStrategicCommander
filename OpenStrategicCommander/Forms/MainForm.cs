@@ -37,6 +37,12 @@ namespace OpenStrategicCommander.Forms
                     lightson += (short)btn.LightFeature;
                 }
             }
+
+            foreach(CmdrButton btn in axesPanel.Controls)
+            {
+                ThreadSafe(() => btn.Text = btn.TextTemplate.Replace("#", Commander.GetHotkey(Commander.ModifierState, btn.WhichAxes).ToString()));
+            }
+
             ThreadSafe(() => radMod1.Checked = ((SC.Modifiers)Commander.ModifierState & SC.Modifiers.Alt1) == SC.Modifiers.Alt1);
             ThreadSafe(() => radMod2.Checked = ((SC.Modifiers)Commander.ModifierState & SC.Modifiers.Alt2) == SC.Modifiers.Alt2);
             ThreadSafe(() => radMod3.Checked = ((SC.Modifiers)Commander.ModifierState & SC.Modifiers.Alt3) == SC.Modifiers.Alt3);
@@ -57,6 +63,19 @@ namespace OpenStrategicCommander.Forms
             ThreadSafe(() => lblSwitchState.Text = string.Format("Switch {0}",sliderval.ToString()));
             Device.SetFeature(1,BitConverter.GetBytes(lightson));
             Commander.LightState = lightson;
+
+            switch(Commander.KeySendOp)
+            {
+                case SC.KeySendOption.SendKey:
+                    ThreadSafe(() => rb_SendKey.Select());
+                    break;
+                case SC.KeySendOption.SendInput:
+                    ThreadSafe(() => rb_SendInput.Select());
+                    break;
+                case SC.KeySendOption.KeyDownUp:
+                    ThreadSafe(() => rb_DownUp.Select());
+                    break;
+            }
         }
 
         private void MainFormLoad(object sender, EventArgs e)
@@ -70,6 +89,8 @@ namespace OpenStrategicCommander.Forms
             Device.OnDisConnected += DeviceOnDisConnected;
             Device.DataReceived += DeviceDataReceived;
             Device.Connect();
+
+            //Default Value for Buttons
             btn1.WhichButton = SC.Buttons.Button1;
             btn1.TextTemplate = "1 (#)";
             btn1.LightFeature = SC.Page1Features.Button1Light;
@@ -98,6 +119,20 @@ namespace OpenStrategicCommander.Forms
             btnPlus.TextTemplate = "+ (#)";
             btnMinus.WhichButton = SC.Buttons.ButtonMinus;
             btnMinus.TextTemplate = "- (#)";
+
+            btnForward.WhichAxes = SC.AxesKey.Forward;
+            btnForward.TextTemplate = "/\\ (#)";
+            btnBackward.WhichAxes = SC.AxesKey.Backward;
+            btnBackward.TextTemplate = "\\/ (#)";
+            btnLeft.WhichAxes = SC.AxesKey.Left;
+            btnLeft.TextTemplate = "< (#)";
+            btnRight.WhichAxes = SC.AxesKey.Right;
+            btnRight.TextTemplate = "> (#)";
+            btnTurnLeft.WhichAxes = SC.AxesKey.TurnLeft;
+            btnTurnLeft.TextTemplate = "<| (#)";
+            btnTurnRight.WhichAxes = SC.AxesKey.TurnRight;
+            btnTurnRight.TextTemplate = "|> (#)";
+
             Device.SetFeature(2, BitConverter.GetBytes((short)SC.Page2Features.GetStatus));
             Commander.PropertyChanged += new PropertyChangedEventHandler(Commander_PropertyChanged);
             
@@ -105,7 +140,7 @@ namespace OpenStrategicCommander.Forms
 
         void KeySender_DoWork(object sender, DoWorkEventArgs e)
         {
-            SCState newstate, oldstate = new SCState(0, 0);
+            SCState newstate, oldstate = new SCState();
             byte button;
             while (true)
             {
@@ -117,6 +152,22 @@ namespace OpenStrategicCommander.Forms
                     {
                         Commander.ButtonChanged((SC.Buttons)button, newstate.ModifierState);
                     }
+
+                    if (newstate.xAxesState != oldstate.xAxesState)
+                    {
+                        Commander.AxeChanged(SC.Axes.xAxes, newstate.xAxesState);
+                    }
+
+                    if (newstate.yAxesState != oldstate.yAxesState)
+                    {
+                        Commander.AxeChanged(SC.Axes.yAxes, newstate.yAxesState);
+                    }
+
+                    if (newstate.zAxesState != oldstate.zAxesState)
+                    {
+                        Commander.AxeChanged(SC.Axes.zAxes, newstate.zAxesState);
+                    }
+
                     oldstate = newstate;
                 }
             }
@@ -138,9 +189,9 @@ namespace OpenStrategicCommander.Forms
         {
             Commander.ModifierState = data[6];
             Commander.ButtonState = data[5];
-            Commander.StateQueue.Enqueue(new SCState(data[5], data[6]));
-            Debug.WriteLine(string.Format("Modifiers: {0} Buttons: {1}", Commander.ModifierState.ToString(), Commander.ButtonState.ToString()));
-            Debug.WriteLine(string.Format("Queue Size: {0}", Commander.StateQueue.Count.ToString()));
+            Commander.StateQueue.Enqueue(new SCState(data));
+            //Debug.WriteLine(string.Format("Modifiers: {0} Buttons: {1}", Commander.ModifierState.ToString(), Commander.ButtonState.ToString()));
+            //Debug.WriteLine(string.Format("Queue Size: {0}", Commander.StateQueue.Count.ToString()));
         }
 
         private void DeviceOnDisConnected()
@@ -173,23 +224,36 @@ namespace OpenStrategicCommander.Forms
         private void CmdrBtn_Click(object sender, EventArgs e)
         {
             CaptureKey x = new CaptureKey();
-            if ((Commander.LightState & (short)(sender as CmdrButton).LightFeature) == (short)(sender as CmdrButton).LightFeature)
+            CmdrButton cmdrButton = sender as CmdrButton;
+
+            // Set the Light of SC to flash
+            if ((Commander.LightState & (short)cmdrButton.LightFeature) == (short)cmdrButton.LightFeature)
             {
-                Device.SetFeature(1, BitConverter.GetBytes(Commander.LightState - (short)(sender as CmdrButton).LightFeature + (short)(sender as CmdrButton).BlinkFeature));
+                Device.SetFeature(1, BitConverter.GetBytes(Commander.LightState - (short)cmdrButton.LightFeature + (short)cmdrButton.BlinkFeature));
             }
             else
             {
-                Device.SetFeature(1, BitConverter.GetBytes(Commander.LightState + (short)(sender as CmdrButton).BlinkFeature));
+                Device.SetFeature(1, BitConverter.GetBytes(Commander.LightState + (short)cmdrButton.BlinkFeature));
             }
 
             x.ShowDialog();
-            Commander.AddHotKey((sender as CmdrButton).WhichButton, Commander.ModifierState, x.PressedKeys);
+            Commander.AddHotKey(cmdrButton.WhichButton, Commander.ModifierState, x.PressedKeys);
             UpdateForm();
         }
 
-        private void saveLayoutToolStripMenuItem_Click(object sender, EventArgs e)
+        private void AxesBtn_Click(object sender, EventArgs e)
         {
-            if (dlgLayoutSave.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            CaptureKey x = new CaptureKey();
+            CmdrButton cmdrButton = sender as CmdrButton;
+            
+            x.ShowDialog();
+            Commander.AddHotKey(cmdrButton.WhichAxes, x.PressedKeys);
+            UpdateForm();
+        }
+
+        private void SaveLayoutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (dlgLayoutSave.ShowDialog() == DialogResult.OK)
             {
                 Stream LayoutSaver = File.Create(dlgLayoutSave.FileName);
                 BinaryFormatter serializer = new BinaryFormatter();
@@ -199,9 +263,9 @@ namespace OpenStrategicCommander.Forms
 
         }
 
-        private void loadLayoutToolStripMenuItem_Click(object sender, EventArgs e)
+        private void LoadLayoutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (dlgLayoutLoad.ShowDialog() == System.Windows.Forms.DialogResult.OK && File.Exists(dlgLayoutLoad.FileName))
+            if (dlgLayoutLoad.ShowDialog() == DialogResult.OK && File.Exists(dlgLayoutLoad.FileName))
             {
                 Stream LayoutLoader = File.OpenRead(dlgLayoutLoad.FileName);
                 BinaryFormatter deserializer = new BinaryFormatter();
@@ -215,6 +279,23 @@ namespace OpenStrategicCommander.Forms
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             KeySender.CancelAsync();
+        }
+
+        private void Bt_TestForm_Click(object sender, EventArgs e)
+        {
+            TestForm TF = new TestForm();
+            TF.ShowDialog();
+        }
+
+        private void KeySend_CheckedChanged(object sender, EventArgs e)
+        { 
+            if (rb_DownUp.Checked)
+                Commander.KeySendOp = SC.KeySendOption.KeyDownUp;
+            if (rb_SendKey.Checked)
+                Commander.KeySendOp = SC.KeySendOption.SendKey;
+            if (rb_SendInput.Checked)
+                Commander.KeySendOp = SC.KeySendOption.SendInput;
+            UpdateForm();
         }
     }
 }

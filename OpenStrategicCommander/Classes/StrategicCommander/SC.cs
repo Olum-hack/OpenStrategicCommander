@@ -5,13 +5,14 @@ using System.Text;
 using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
+using System.Diagnostics;
 
 namespace OpenStrategicCommander.Classes.StrategicCommander
 {
     [Serializable()]
     public class SC : INotifyPropertyChanged
     {
-        [field:NonSerialized()]
+        [field: NonSerialized()]
         public event PropertyChangedEventHandler PropertyChanged;
 
         public enum Page2Features
@@ -38,7 +39,6 @@ namespace OpenStrategicCommander.Classes.StrategicCommander
             RecButtonLight = 0x1000,
             RecButtonBlink = 0x2000
         }
-        
 
         [Flags]
         public enum Buttons
@@ -65,9 +65,34 @@ namespace OpenStrategicCommander.Classes.StrategicCommander
             Switch1 = 48
         }
 
+        public enum AxesKey
+        {
+            Forward,
+            Backward,
+            Left,
+            Right,
+            TurnLeft,
+            TurnRight
+        }
+
+        public enum Axes
+        {
+            xAxes,
+            yAxes,
+            zAxes
+        }
+
+        public enum KeySendOption
+        {
+            KeyDownUp,
+            SendKey,
+            SendInput
+        }
+
         byte _ButtonState;
         byte _ModifierState;
         short _LightState;
+        KeySendOption _KeySendOp;
 
         public Queue StateQueue = new Queue();
 
@@ -80,8 +105,9 @@ namespace OpenStrategicCommander.Classes.StrategicCommander
         public byte ModifierState
         {
             set
-            {_ModifierState = value;
-            OnPropertyChanged("ModifierState");
+            {
+                _ModifierState = value;
+                OnPropertyChanged("ModifierState");
             }
             get { return _ModifierState; }
         }
@@ -92,33 +118,54 @@ namespace OpenStrategicCommander.Classes.StrategicCommander
             get { return _LightState; }
         }
 
-        SCButton[] SCButtons = new SCButton[8];
+        /// <summary>
+        /// Option to send the Key
+        /// </summary>
+        public KeySendOption KeySendOp
+        {
+            set { _KeySendOp = value; }
+            get { return _KeySendOp; }
+        }
+
+        readonly SCButton[] SCButtons = new SCButton[8];
+        readonly SCAxes[] SCAxes = new SCAxes[6];
 
         public SC()
         {
-            SCButtons[0] = new SCButton(SC.Buttons.Button1);
-            SCButtons[1] = new SCButton(SC.Buttons.Button2);
-            SCButtons[2] = new SCButton(SC.Buttons.Button3);
-            SCButtons[3] = new SCButton(SC.Buttons.Button4);
-            SCButtons[4] = new SCButton(SC.Buttons.Button5);
-            SCButtons[5] = new SCButton(SC.Buttons.Button6);
-            SCButtons[6] = new SCButton(SC.Buttons.ButtonPlus);
-            SCButtons[7] = new SCButton(SC.Buttons.ButtonMinus);
+            SCButtons[0] = new SCButton(Buttons.Button1);
+            SCButtons[1] = new SCButton(Buttons.Button2);
+            SCButtons[2] = new SCButton(Buttons.Button3);
+            SCButtons[3] = new SCButton(Buttons.Button4);
+            SCButtons[4] = new SCButton(Buttons.Button5);
+            SCButtons[5] = new SCButton(Buttons.Button6);
+            SCButtons[6] = new SCButton(Buttons.ButtonPlus);
+            SCButtons[7] = new SCButton(Buttons.ButtonMinus);
+
+            SCAxes[0] = new SCAxes(AxesKey.Right);
+            SCAxes[1] = new SCAxes(AxesKey.Left);
+            SCAxes[2] = new SCAxes(AxesKey.Backward);
+            SCAxes[3] = new SCAxes(AxesKey.Forward);
+            SCAxes[4] = new SCAxes(AxesKey.TurnRight);
+            SCAxes[5] = new SCAxes(AxesKey.TurnLeft);
+
+            KeySendOp = KeySendOption.SendInput;
         }
 
-        public Keys GetHotkey(byte Modifiers,Buttons Button)
+        public Keys GetHotkey(byte Modifiers, Buttons Button)
         {
             SCButton x = SCButtons.FirstOrDefault(b => b.Button == Button);
             return x.GetHotkey(Modifiers);
         }
 
+        public Keys GetHotkey(byte Modifiers, AxesKey Axe)
+        {
+            SCAxes x = SCAxes.FirstOrDefault(b => b.Axe == Axe);
+            return x.GetHotkey();
+        }
+
         protected void OnPropertyChanged(string name)
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(name));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         public void AddHotKey(Buttons Button, byte Modifiers, Keys KeyCode)
@@ -127,21 +174,111 @@ namespace OpenStrategicCommander.Classes.StrategicCommander
             x.AddHotkey(KeyCode, Modifiers);
         }
 
+        public void AddHotKey(AxesKey Axe, Keys KeyCode)
+        {
+            SCAxes x = SCAxes.FirstOrDefault(b => b.Axe == Axe);
+            x.AddHotkey(KeyCode);
+        }
+
         public void ButtonChanged(Buttons Button, byte Modifiers)
         {
-            foreach(Buttons btn in Enum.GetValues(typeof(Buttons)))
+            foreach (Buttons btn in Enum.GetValues(typeof(Buttons)))
             {
                 if ((btn & Button) == btn)
                 {
                     SCButton x = SCButtons.FirstOrDefault(b => b.Button == btn);
                     if (x.GetHotkey(Modifiers) != Keys.None && !x.Depressed)
                     {
-                        SendKeys.SendWait(KeysToSendKeyString(x.GetHotkey(Modifiers)));
+                        switch (_KeySendOp)
+                        {
+                            case KeySendOption.KeyDownUp:
+                                KeySend.SendKey(x.GetHotkey(Modifiers));
+                                break;
+
+                            case KeySendOption.SendKey:
+                                SendKeys.SendWait(KeysToSendKeyString(x.GetHotkey(Modifiers)));
+                                break;
+                            case KeySendOption.SendInput:
+                                SC_SendInput.ClickKey(x.GetHotkey(Modifiers));
+                                break;
+                        }
                     }
                     x.Depressed = !x.Depressed;
                 }
             }
-            
+        }
+        public void AxeChanged(Axes Axe, int AxeValue)
+        {
+            List<SCAxes> lAxes = new List<SCAxes>(1);
+            int offset = 0;
+            switch (Axe)
+            {
+                case Axes.xAxes:
+                    if (AxeValue < offset)
+                    {
+                        lAxes.Add(SCAxes.FirstOrDefault(b => b.Axe == AxesKey.Left));
+
+                    }
+                    else if (AxeValue > offset)
+                    {
+                        lAxes.Add(SCAxes.FirstOrDefault(b => b.Axe == AxesKey.Right));
+                    }
+                    else
+                    {
+                        lAxes.Add(SCAxes.FirstOrDefault(b => b.Axe == AxesKey.Left));
+                        lAxes.Add(SCAxes.FirstOrDefault(b => b.Axe == AxesKey.Right));
+                    }
+                    break;
+                case Axes.yAxes:
+                    if (AxeValue > offset)
+                    {
+                        lAxes.Add(SCAxes.FirstOrDefault(b => b.Axe == AxesKey.Backward));
+                    }
+                    else if (AxeValue < offset)
+                    {
+                        lAxes.Add(SCAxes.FirstOrDefault(b => b.Axe == AxesKey.Forward));
+                    }
+                    else
+                    {
+                        lAxes.Add(SCAxes.FirstOrDefault(b => b.Axe == AxesKey.Backward));
+                        lAxes.Add(SCAxes.FirstOrDefault(b => b.Axe == AxesKey.Forward));
+                    }
+                    break;
+                case Axes.zAxes:
+                    if (AxeValue < offset)
+                    {
+                        lAxes.Add(SCAxes.FirstOrDefault(b => b.Axe == AxesKey.TurnLeft));
+                    }
+                    else if (AxeValue > offset)
+                    {
+                        lAxes.Add(SCAxes.FirstOrDefault(b => b.Axe == AxesKey.TurnRight));
+                    }
+                    else
+                    {
+                        lAxes.Add(SCAxes.FirstOrDefault(b => b.Axe == AxesKey.TurnLeft));
+                        lAxes.Add(SCAxes.FirstOrDefault(b => b.Axe == AxesKey.TurnRight));
+                    }
+                    break;
+            }
+
+            foreach (SCAxes axe in lAxes)
+            {
+                if (axe != null && axe.GetHotkey() != Keys.None)
+                {
+                    SC_SendInput.KeyEvent keyEvent = Math.Abs(AxeValue) > offset ? SC_SendInput.KeyEvent.KeyDown : SC_SendInput.KeyEvent.KeyUp;
+
+                    if (axe.Depressed && keyEvent == SC_SendInput.KeyEvent.KeyUp || !axe.Depressed && keyEvent == SC_SendInput.KeyEvent.KeyDown)
+                    {
+                        SC_SendInput.ClickKey(axe.GetHotkey(), keyEvent);
+                        axe.Depressed = keyEvent == SC_SendInput.KeyEvent.KeyDown;
+                    }
+
+                    //Debug.WriteLine(axe.Axe.ToString() + "\t"+ AxeValue.ToString()+"\t" + keyEvent.ToString());
+                }
+            }
+
+            //foreach (SCAxes axe in SCAxes)
+            //    Debug.WriteLine(axe.Axe.ToString() + "\t" + axe.Depressed.ToString());
         }
 
         private string KeysToSendKeyString(Keys key)
@@ -224,8 +361,8 @@ namespace OpenStrategicCommander.Classes.StrategicCommander
                 case Keys.NumPad0:
                 case Keys.NumPad1:
                 case Keys.NumPad2:
-                case Keys.NumPad3:  
-                case Keys.NumPad4:   
+                case Keys.NumPad3:
+                case Keys.NumPad4:
                 case Keys.NumPad5:
                 case Keys.NumPad6:
                 case Keys.NumPad7:
